@@ -1,0 +1,23 @@
+{
+  "name": "dh2o-release",
+  "version": "1.0.0",
+  "description": "Release script for DH2O projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DigitalH2O/dh2o-release.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DigitalH2O/dh2o-release/issues"
+  },
+  "homepage": "https://github.com/DigitalH2O/dh2o-release#readme",
+  "dependencies": {
+    "node-cmd-promise": "^1.0.0",
+    "semver": "^5.3.0"
+  }
+}
