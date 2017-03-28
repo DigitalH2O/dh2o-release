@@ -113,9 +113,10 @@ module.exports = ({ buildStep, publishStep }) => {
   .then(() => commitToDevelop())
   .then(() => updateAndTagMaster())
   .then(() => publish())
+  .then(() => cmd('git checkout develop'))
   .then(() => console.log(`Finished release v${packagejson.version}`))
   .catch((err) => {
-    console.log(err)
+    console.log(err.message)
     process.exit(1)
   })
 }

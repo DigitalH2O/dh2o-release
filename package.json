@@ -1,6 +1,6 @@
 {
   "name": "dh2o-release",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Release script for DH2O projects",
   "main": "index.js",
   "scripts": {
