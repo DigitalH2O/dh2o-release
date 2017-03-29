@@ -122,7 +122,7 @@ module.exports = ({ buildStep, publishStep }) => {
   .then(() => updateAndTagMaster())
   .then(() => publish())
   .then(() => {
-    console.log('Returning to develop...');
+    log('Returning to develop...');
     return cmd('git checkout develop')
   })
   .then(() => log(`Finished release v${packagejson.version}`))
