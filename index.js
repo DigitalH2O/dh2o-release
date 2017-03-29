@@ -8,6 +8,10 @@ var semver = require('semver')
 
 var packagejson = require(path.join(projectDir, './package.json'))
 
+var log = (message) => console.log(chalk.green(message))
+var warn = (message) => console.log(chalk.yellow(message))
+var error = (message) => console.log(chalk.red(message))
+
 module.exports = ({ buildStep, publishStep }) => {
   var argv = require('yargs')
   .option('type', {
@@ -27,20 +31,20 @@ module.exports = ({ buildStep, publishStep }) => {
 
   if (argv['dry-run']) {
     cmdDestructive = (command) => {
-      chalk.yellow(command)
+      warn(command)
       return Promise.resolve()
     }
 
     writeFile = (filename, contents) => {
-      console.log(`writing to file: ${filename}`)
+      warn(`writing to file: ${filename}`)
       console.log()
-      console.log(contents)
+      warn(contents)
       console.log()
     }
   }
 
   var safetyCheck = () => {
-    chalk.green('Checking if it\'s safe to release...')
+    log('Checking if it\'s safe to release...')
     return cmd('git symbolic-ref --short HEAD') // this command gets the current branch name
     .then(({ stdout, stderr }) => {
       assert(
@@ -66,7 +70,7 @@ module.exports = ({ buildStep, publishStep }) => {
 
   var build = () => {
     if (buildStep) {
-      chalk.green('Building...')
+      log('Building...')
       return buildStep()
     }
 
@@ -74,7 +78,7 @@ module.exports = ({ buildStep, publishStep }) => {
   }
 
   var versionBump = () => {
-    chalk.green('Updating package.json...')
+    log('Updating package.json...')
     packagejson.version = semver.inc(packagejson.version, argv['type'])
     writeFile('./package.json', JSON.stringify(packagejson, null, 2))
 
@@ -82,6 +86,7 @@ module.exports = ({ buildStep, publishStep }) => {
   }
 
   var commitToDevelop = () => {
+    log('Comitting/pushing to develop...')
     return cmdDestructive('git add -A .')
     .then(() => cmdDestructive(`git commit -m "Release ${packagejson.version}"`))
   }
@@ -90,11 +95,11 @@ module.exports = ({ buildStep, publishStep }) => {
     return cmdDestructive('git checkout master')
     .then(() => cmdDestructive('git merge develop'))
     .then(() => {
-      chalk.green('Pushing to master...')
+      log('Pushing to master...')
       return cmdDestructive('git push')
     })
     .then(() => {
-      chalk.green('Tagging and pushing tag...')
+      log('Tagging and pushing tag...')
       return cmdDestructive(`git tag -a v${packagejson.version} -m "Release v${packagejson.version}"`)
     })
     .then(() => cmdDestructive(`git push origin v${packagejson.version}`))
@@ -102,7 +107,7 @@ module.exports = ({ buildStep, publishStep }) => {
 
   var publish = () => {
     if (publishStep) {
-      chalk.green('Publishing...');
+      log('Publishing...')
       return publishStep()
     }
 
@@ -119,9 +124,9 @@ module.exports = ({ buildStep, publishStep }) => {
     console.log('Returning to develop...');
     return cmd('git checkout develop')
   })
-  .then(() => console.log(`Finished release v${packagejson.version}`))
+  .then(() => log(`Finished release v${packagejson.version}`))
   .catch((err) => {
-    chalk.red(err.message)
+    error(err.message)
     process.exit(1)
   })
 }
