@@ -1,6 +1,7 @@
 var projectDir = process.cwd()
 var assert = require('assert')
 var fs = require('fs')
+var chalk = require('chalk')
 var cmd =  require('node-cmd-promise')
 var path = require('path')
 var semver = require('semver')
@@ -26,7 +27,7 @@ module.exports = ({ buildStep, publishStep }) => {
 
   if (argv['dry-run']) {
     cmdDestructive = (command) => {
-      console.log(command)
+      chalk.yellow(command)
       return Promise.resolve()
     }
 
@@ -39,6 +40,7 @@ module.exports = ({ buildStep, publishStep }) => {
   }
 
   var safetyCheck = () => {
+    chalk.green('Checking if it\'s safe to release...')
     return cmd('git symbolic-ref --short HEAD') // this command gets the current branch name
     .then(({ stdout, stderr }) => {
       assert(
@@ -64,7 +66,7 @@ module.exports = ({ buildStep, publishStep }) => {
 
   var build = () => {
     if (buildStep) {
-      console.log('Building...')
+      chalk.green('Building...')
       return buildStep()
     }
 
@@ -72,7 +74,7 @@ module.exports = ({ buildStep, publishStep }) => {
   }
 
   var versionBump = () => {
-    console.log('Updating package.json...')
+    chalk.green('Updating package.json...')
     packagejson.version = semver.inc(packagejson.version, argv['type'])
     writeFile('./package.json', JSON.stringify(packagejson, null, 2))
 
@@ -88,11 +90,11 @@ module.exports = ({ buildStep, publishStep }) => {
     return cmdDestructive('git checkout master')
     .then(() => cmdDestructive('git merge develop'))
     .then(() => {
-      console.log('Pushing to master...')
+      chalk.green('Pushing to master...')
       return cmdDestructive('git push')
     })
     .then(() => {
-      console.log('Tagging and pushing tag...')
+      chalk.green('Tagging and pushing tag...')
       return cmdDestructive(`git tag -a v${packagejson.version} -m "Release v${packagejson.version}"`)
     })
     .then(() => cmdDestructive(`git push origin v${packagejson.version}`))
@@ -100,7 +102,7 @@ module.exports = ({ buildStep, publishStep }) => {
 
   var publish = () => {
     if (publishStep) {
-      console.log('Publishing...');
+      chalk.green('Publishing...');
       return publishStep()
     }
 
@@ -119,7 +121,7 @@ module.exports = ({ buildStep, publishStep }) => {
   })
   .then(() => console.log(`Finished release v${packagejson.version}`))
   .catch((err) => {
-    console.log(err.message)
+    chalk.red(err.message)
     process.exit(1)
   })
 }
