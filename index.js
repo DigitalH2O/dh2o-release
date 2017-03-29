@@ -89,6 +89,7 @@ module.exports = ({ buildStep, publishStep }) => {
     log('Comitting/pushing to develop...')
     return cmdDestructive('git add -A .')
     .then(() => cmdDestructive(`git commit -m "Release ${packagejson.version}"`))
+    .then(() => cmdDestructive(`git push`))
   }
 
   var updateAndTagMaster = () => {
