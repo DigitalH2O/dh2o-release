@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-require('./release')
-
 require('resolve')('./release.js', {
   basedir: process.cwd()
 }, function (error, localRelease) {
