@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+require('./release')
+
+require('resolve')('./release.js', {
+  basedir: process.cwd()
+}, function (error, localRelease) {
+  if (error) {
+    // no local script -- run the generic release script with no extra
+    // arguments
+    require('../index.js')({})
+  } else {
+    require(localRelease)
+  }
+})
