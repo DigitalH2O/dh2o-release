@@ -5,6 +5,7 @@ var chalk = require('chalk')
 var cmd =  require('node-cmd-promise')
 var path = require('path')
 var semver = require('semver')
+var inquirer = require('inquirer')
 
 var packagejson = require(path.join(projectDir, './package.json'))
 
@@ -16,7 +17,6 @@ module.exports = ({ buildStep, publishStep }) => {
   var argv = require('yargs')
   .option('type', {
     alias: 't',
-    demandOption: true,
     choices: ['major', 'minor', 'patch']
   })
   .option('dry-run', {
@@ -24,6 +24,8 @@ module.exports = ({ buildStep, publishStep }) => {
     type: 'boolean'
   })
   .argv
+
+
 
   cmdDestructive = cmd
 
@@ -115,7 +117,21 @@ module.exports = ({ buildStep, publishStep }) => {
     return Promise.resolve(null)
   }
 
-  safetyCheck()
+  // before we start, ensure the user has chosen a type of release
+  const typeArgPromise = (
+    argv['type'] ?
+    Promise.resolve(argv['type']) :
+    inquirer.prompt([{
+      type: 'list',
+      name: 'type',
+      message: 'Which type of release is this?',
+      default: 'major',
+      choices: ['major', 'minor', 'patch']
+    }]).then((answers) => { argv['type'] = answers.type }))
+
+
+  typeArgPromise
+  .then(() => safetyCheck())
   .then(() => build())
   .then(() => versionBump())
   .then(() => commitToDevelop())
